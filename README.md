@@ -1,2 +1,2 @@
-# static ip address
-static ip address
+# network management
+network management
