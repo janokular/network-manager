@@ -1,22 +1,29 @@
 #!/bin/bash
 
 # This script is used for setting an static IPv4 address
-# It was designed for minimal instalation of Debian 12
+
+#INTERFACE='/etc/systemd/network/lan0.network'
+INTERFACE='./lan0.network'
 
 usage() {
   echo "Usage: ${0} [-d] IP_ADDRESS"
-  echo 'Manage network by setting static or dynamic IPv4'
+  echo 'Manage network by setting static IPv4'
   echo -e "-d\tSet back to default setting (all arguments after -d will be omitted)"
   exit 1
 }
 
 set_default_settings() {
-  echo 'Reverting to default settings...'
+  echo 'Reverting to default settings'
+  echo -e "[Match]\nName=eth0\n\n[Network]\nDHCP=ipv4" > "${INTERFACE}"
 }
 
 validate_ip() {
-  local IP_REGEX="255.255.255.255"
-  
+  # range:
+  # 10.0.0.0 to 10.255.255.255
+  # 172.16.0.0 to 172.31.255.255
+  # 192.168.0.0 to 192.168.255.255
+  local IP_REGEX='10.0.0.0'
+
   if [[ ! "${IP_ADDRESS}" =~ "${IP_REGEX}" ]]
   then
     echo "Invalid IP: ${IP_ADDRESS}"
@@ -25,13 +32,17 @@ validate_ip() {
 }
 
 set_static_ip() {
-  echo "Setting static IP to: ${IP_ADDRESS}"
+  local GATEWAY=''
+  local DNS=''
+
+  echo "Setting static IP: ${IP_ADDRESS}"
+  echo -e "[Match]\nName=enp8s0\n\n[Network]\nAddress=${IP_ADDRESS}\nGateway=${GATEWAY}\nDNS=${DNS}" > ${INTERFACE}
 }
 
 # Check if script was run with sudo/root priviges
 if [[ "${UID}" -ne 0  ]]
 then
-  echo "Please run with sudo or as a root" >&2
+  echo 'Please run with sudo or as a root' >&2
   exit 1
 fi
 
@@ -52,10 +63,10 @@ then
   # Display warning massage when user provide arguments after option -d
   if [[ "${#}" -gt 0 ]]
   then
-    echo 'Warrning: all arguments after -d will be omitted'
+    echo 'Warning: all arguments after -d will be omitted'
   fi
   
-  set_default_settings
+  set_default_settings "${INTERFACE}"
 else
   # Check if user provided only one argument for IP_ADDRESS
   if [[ "${#}" -lt 1 ]]
@@ -75,6 +86,6 @@ else
   # Check if IP_ADDRESS validation succeeded
   if [[ "${?}" -eq 0 ]]
   then
-    set_static_ip "${IP_ADDRESS}"
+    set_static_ip "${IP_ADDRESS}" "${INTERFACE}"
   fi
 fi
