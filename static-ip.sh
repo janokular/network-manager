@@ -79,7 +79,7 @@ else
     usage
   fi
 
-  # First argument is treated as an IP_ADDRESS
+  # First argument is treated as IP_ADDRESS
   IP_ADDRESS="${1}"
   validate_ip "${IP_ADDRESS}"
 
