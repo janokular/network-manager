@@ -39,7 +39,7 @@ set_static_ip() {
   echo -e "[Match]\nName=enp8s0\n\n[Network]\nAddress=${IP_ADDRESS}\nGateway=${GATEWAY}\nDNS=${DNS}" > ${INTERFACE}
 }
 
-# Check if script was run with sudo/root priviges
+# Check if script was run with sudo/root privileges
 if [[ "${UID}" -ne 0  ]]
 then
   echo 'Please run with sudo or as a root' >&2
